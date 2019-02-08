@@ -465,25 +465,26 @@ class _List(object):
 
         # Add query
         if query:
-            where = etree.Element('Where')
+            if "Where" in query:
+                where = etree.Element('Where')
 
-            parents = []
-            parents.append(where)
-            for i, field in enumerate(query['Where']):
-                if field == 'And':
-                    parents.append(etree.SubElement(parents[-1], 'And'))
-                elif field == 'Or':
-                    if parents[-1].tag == 'Or':
-                        parents.pop()
-                    parents.append(etree.SubElement(parents[-1], 'Or'))
-                else:
-                    _type = etree.SubElement(parents[-1], field[0])
-                    field_ref = etree.SubElement(_type, 'FieldRef')
-                    field_ref.set('Name', self._disp_cols[field[1]]['name'])
-                    value = etree.SubElement(_type, 'Value')
-                    value.set('Type', self._disp_cols[field[1]]['type'])
-                    value.text = self._sp_type(field[1], field[2])
-            query['Where'] = where
+                parents = []
+                parents.append(where)
+                for i, field in enumerate(query['Where']):
+                    if field == 'And':
+                        parents.append(etree.SubElement(parents[-1], 'And'))
+                    elif field == 'Or':
+                        if parents[-1].tag == 'Or':
+                            parents.pop()
+                        parents.append(etree.SubElement(parents[-1], 'Or'))
+                    else:
+                        _type = etree.SubElement(parents[-1], field[0])
+                        field_ref = etree.SubElement(_type, 'FieldRef')
+                        field_ref.set('Name', self._disp_cols[field[1]]['name'])
+                        value = etree.SubElement(_type, 'Value')
+                        value.set('Type', self._disp_cols[field[1]]['type'])
+                        value.text = self._sp_type(field[1], field[2])
+                query['Where'] = where
             soap_request.add_query(query)
 
         # Set Row Limit
@@ -785,7 +786,6 @@ class soap(object):
             order = etree.SubElement(Query, 'OrderBy')
             for field in pyquery['OrderBy']:
                 fieldref = etree.SubElement(order, 'FieldRef')
-                fieldref.set('Name', field)
                 if type(field) == tuple:
                     fieldref.set('Name', field[0])
                     if field[1] == 'DESCENDING':
